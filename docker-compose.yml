@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  db:
+    image: ${PROJ_NAME}-maria:latest
+    container_name: ${PROJ_NAME}-maria
+    build:
+      context: ./maria
+      dockerfile: Dockerfile
+    volumes:
+      - maria-data:/var/lib/mysql
+      - ./maria/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 13306:3306
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+  go:
+    image: ${PROJ_NAME}:latest
+    container_name: ${PROJ_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/go/src/app
+    ports:
+      - ${DEV_PORT}:${DEV_PORT}
+    depends_on:
+      - db
+    tty: true
+
+volumes:
+  maria-data:
